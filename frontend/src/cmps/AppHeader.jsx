@@ -83,8 +83,8 @@ export function AppHeader() {
                     {isAllowed() && 
                         <>
                             <NavLink to="/user">Users</NavLink> <>|</>
-                            <NavLink to="/msg" >Messages</NavLink> <>|</>
-                            <NavLink to="/about" >About</NavLink>
+                            <NavLink to="/msg">Messages</NavLink> <>|</>
+                            <NavLink to="/about">About</NavLink>
                         </>
                     }
                 </nav>
