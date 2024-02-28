@@ -15,6 +15,7 @@ export function AppHeader() {
     const navigate = useNavigate()
 
     async function onLogin(credentials) {
+        console.log("AppHeader onLogin", credentials)
         try {
             const user = await authService.login(credentials)
             setLoggedinUser(user)

@@ -23,8 +23,7 @@ export async function getMsgs(req, res) {
 
 export async function deleteMsg(req, res) {
     try {
-        const msg = await msgService.getById(req.params.id)
-        await msgService.remove(req.params.id)
+        await msgService.remove(req.params.msgId)
         res.send({ msg: 'Deleted successfully' })
     } catch (err) {
         loggerService.error('Failed to delete msg', err)

@@ -29,7 +29,7 @@ async function get(msgId) {
 
 async function remove(msgId) {
     const url = BASE_URL + msgId
-    var { data: res } = await axios.delete(url)
+    var { data: res } = await axios.delete(url, msgId)
     return res
 }
 
