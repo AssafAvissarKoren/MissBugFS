@@ -80,8 +80,13 @@ export function AppHeader() {
                 <nav className="app-nav">
                     <NavLink to="/" >Home</NavLink> |
                     <NavLink to="/bug">Bugs</NavLink> |
-                    {isAllowed() && <NavLink to="/user">Users</NavLink>}
-                    {isAllowed() && <NavLink to="/about" >About</NavLink>}
+                    {isAllowed() && 
+                        <>
+                            <NavLink to="/user">Users</NavLink> <>|</>
+                            <NavLink to="/msg" >Messages</NavLink> <>|</>
+                            <NavLink to="/about" >About</NavLink>
+                        </>
+                    }
                 </nav>
             </section>
             <UserMsg />

@@ -1,7 +1,7 @@
-import { userService } from '../services/user.service.js'
-import { showSuccessMsg, showErrorMsg } from '../services/event-bus.service.js'
-import { UserList } from '../cmps/UserList.jsx'
-import { UserFilter } from "../cmps/UserFilter.jsx"
+import { userService } from '../../services/user.service.js'
+import { showSuccessMsg, showErrorMsg } from '../../services/event-bus.service.js'
+import { UserList } from './UserList.jsx'
+import { UserFilter } from './UserFilter.jsx'
 import { useState } from 'react'
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -50,7 +50,7 @@ export function UserIndex() {
       severity: +prompt('User severity?'),
     }
     try {
-      const savedUser = await userService.save(user)
+      const savedUser = await userService.add(user)
       console.log('Added User', savedUser)
       setUsers(prevUsers => [...prevUsers, savedUser])
       showSuccessMsg('User added')
@@ -65,7 +65,7 @@ export function UserIndex() {
     const userToSave = { ...user, score }
     try {
 
-      const savedUser = await userService.save(userToSave)
+      const savedUser = await userService.update(userToSave)
       setUsers(prevUsers => prevUsers.map((currUser) =>
         currUser._id === savedUser._id ? savedUser : currUser
       ))

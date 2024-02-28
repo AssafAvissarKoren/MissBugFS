@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { BugPreview } from './BugPreview'
 import { useNavigate } from "react-router"
 
-export function BugList({ bugs, onRemoveBug, onEditBug }) {
+export function BugList({ bugs, onRemoveBug, onEditBug, onAddMsg }) {
   const navigate = useNavigate()
 
   return (
@@ -15,7 +15,10 @@ export function BugList({ bugs, onRemoveBug, onEditBug }) {
             <button onClick={() => {onRemoveBug(bug._id)}}>x</button>
             <button onClick={() => {onEditBug(bug)}}>Edit</button>
           </div>
-          <button onClick={() => {navigate(`/bug/${bug._id}`)}}>Details</button>
+          <div>
+            <button onClick={() => {navigate(`/bug/${bug._id}`)}}>Details</button>
+            <button onClick={() => {onAddMsg(bug._id)}}>Add Msg</button>
+          </div>
         </li>
       ))}
     </ul>

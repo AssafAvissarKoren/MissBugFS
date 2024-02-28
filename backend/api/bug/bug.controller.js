@@ -61,10 +61,11 @@ export async function removeBug(req, res) {
     try {
         const loggedinUser = authService.validateToken(req.cookies.loginToken)
         const bug = await bugService.getById(bugId)
-        if (loggedinUser._id !== bug.creator._id || loggedinUser.isAdmin !== true) {
+        if (loggedinUser._id == bug.creator._id || loggedinUser.isAdmin == true) {
+            await bugService.remove(bugId)
+        } else {
             return res.status(401).send('Not authorized')
         }
-        await bugService.remove(bugId)
         res.send('Deleted OK')
     } catch (err) {
         res.status(400).send(`Couldn't remove bug`)
@@ -78,7 +79,7 @@ export async function addBug(req, res) {
     try {
         const loggedinUser = authService.validateToken(req.cookies.loginToken)
         const bugWithCreator = { ...bugToSave, creator: { _id: loggedinUser._id, username: loggedinUser.username } }
-        const savedbug = await bugService.save(bugWithCreator)
+        const savedbug = await bugService.add(bugWithCreator)
         res.send(savedbug)
     } catch (err) {
         res.status(400).send(`Couldn't save bug`)
@@ -91,11 +92,12 @@ export async function updateBug(req, res) {
     try {
         const loggedinUser = authService.validateToken(req.cookies.loginToken)
         const bug = await bugService.getById(bugId)
-        if (loggedinUser._id !== bug.creator._id || loggedinUser.isAdmin !== true) {
+        if (loggedinUser._id == bug.creator._id || loggedinUser.isAdmin == true) {
+            const savedbug = await bugService.update(bugToUpdate)
+            res.send(savedbug)
+        } else {
             return res.status(401).send('Not authorized')
         }
-        const savedbug = await bugService.save(bugToUpdate)
-        res.send(savedbug)
     } catch (err) {
         res.status(400).send(`Couldn't update bug`)
     }

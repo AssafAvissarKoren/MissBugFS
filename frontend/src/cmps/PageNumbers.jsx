@@ -1,8 +1,8 @@
 import React from 'react'
 
-export function PageNumbers ({ numberOfBugs, bugsPerPage, filterBy, onSetFilterBy, setCurrentPage }) {
+export function PageNumbers ({ totalNum, numPerPage, filterBy, onSetFilterBy, setCurrentPage }) {
     const pageNumbers = []
-    for (let i = 1; i <= Math.ceil(numberOfBugs / bugsPerPage); i++) {
+    for (let i = 1; i <= Math.ceil(totalNum / numPerPage); i++) {
         pageNumbers.push(i)
     }
 

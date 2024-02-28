@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { userService } from '../services/user.service.js'
-import { showErrorMsg } from '../services/event-bus.service.js'
+import { userService } from '../../services/user.service.js'
+import { showErrorMsg } from '../../services/event-bus.service.js'
 import { useEffect } from 'react'
 import { useNavigate, useParams } from "react-router"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'

@@ -19,7 +19,8 @@ export const userService = {
 	query,
 	get,
 	remove,
-	save,
+	add,
+    update,
 	getEmptyUser,
 	getDefaultFilter,
 	filterURL,
@@ -32,6 +33,7 @@ async function query(filterBy = {}) {
 }
 
 async function getUsers() {
+    console.log('userService getUsers')
     const { data: users } = await axios.get(BASE_URL)
     return users
 }
@@ -54,13 +56,20 @@ async function remove(userId) {
     return res
 }
 
-async function save(user) {
-    const method = user._id ? 'put' : 'post'
-    const url = user._id ? BASE_URL + user._id : BASE_URL
-    const { data: savedUser } = await axios[method](url, user)
+async function add(user) {
+    const url = BASE_URL
+    const { data: savedUser } = await axios.post(url, user)
+    return savedUser
+}
+
+async function update(user) {
+    const url = BASE_URL + user._id
+    const { data: savedUser } = await axios.put(url, user)
     if (getLoggedinUser().id === savedUser.id) saveLocalUser(savedUser)
     return savedUser
 }
+
+
 
 function getEmptyUser(username = '', fullname = '', password = '', score = '', imgUrl = '') {
 	return { username, fullname, password, score, imgUrl }

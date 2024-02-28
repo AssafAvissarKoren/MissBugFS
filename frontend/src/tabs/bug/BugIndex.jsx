@@ -1,8 +1,10 @@
-import { bugService } from '../services/bug.service.js'
-import { showSuccessMsg, showErrorMsg } from '../services/event-bus.service.js'
-import { BugList } from '../cmps/BugList.jsx'
-import { BugFilter } from "../cmps/BugFilter.jsx"
-import { PageNumbers } from "../cmps/PageNumbers.jsx"
+import { bugService } from '../../services/bug.service.js'
+import { userService } from '../../services/user.service.js'
+import { msgService } from '../../services/msg.service.js'
+import { showSuccessMsg, showErrorMsg } from '../../services/event-bus.service.js'
+import { BugList } from './BugList.jsx'
+import { BugFilter } from './BugFilter.jsx'
+import { PageNumbers } from '../../cmps/PageNumbers.jsx'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import jsPDF from 'jspdf'
@@ -55,7 +57,6 @@ export function BugIndex() {
   async function onRemoveBug(bugId) {
     try {
       await bugService.remove(bugId)
-      console.log('Deleted Succesfully!')
       setBugs(prevBugs => prevBugs.filter((bug) => bug._id !== bugId))
       showSuccessMsg('Bug removed')
     } catch (err) {
@@ -70,8 +71,7 @@ export function BugIndex() {
       severity: +prompt('Bug severity?'),
     }
     try {
-      const savedBug = await bugService.save(bug)
-      console.log('Added Bug', savedBug)
+      const savedBug = await bugService.add(bug)
       setBugs(prevBugs => [...prevBugs, savedBug])
       showSuccessMsg('Bug added')
     } catch (err) {
@@ -84,8 +84,7 @@ export function BugIndex() {
     const severity = prompt('New severity?')
     const bugToSave = { ...bug, severity }
     try {
-
-      const savedBug = await bugService.save(bugToSave)
+      const savedBug = await bugService.update(bugToSave)
       setBugs(prevBugs => prevBugs.map((currBug) =>
         currBug._id === savedBug._id ? savedBug : currBug
       ))
@@ -99,6 +98,26 @@ export function BugIndex() {
   function onSetFilterBy(filterBy) {
     setFilterBy(prevFilter => ({ ...prevFilter, ...filterBy }))
   }
+
+  async function onAddMsg(bugId) {
+    const msg = prompt('New Message')
+    const loggedinUser = userService.getLoggedinUser()
+    if (loggedinUser) {
+      const msgToAdd = {
+        txt: msg,
+        aboutBugId: bugId,
+        byUserId: loggedinUser._id
+      }
+      try {
+        await msgService.add(msgToAdd)
+        showSuccessMsg('Message added')
+      } catch (err) {
+        console.log('Error from onAddMsg ->', err)
+        showErrorMsg('Cannot add message')
+      }
+    }
+  }
+
 
   function downloadBugsAsPDF() {
     const doc = new jsPDF()
@@ -132,10 +151,10 @@ export function BugIndex() {
         <BugFilter filterBy={filterBy} onSetFilterBy={onSetFilterBy} />
         <button onClick={onAddBug}>Add Bug ⛐</button>
         <button onClick={downloadBugsAsPDF}>Download Bugs as PDF</button>
-        <BugList bugs={bugs} onRemoveBug={onRemoveBug} onEditBug={onEditBug} />
+        <BugList bugs={bugs} onRemoveBug={onRemoveBug} onEditBug={onEditBug} onAddMsg={onAddMsg}/>
         <PageNumbers
-          numberOfBugs={totalNumberOfBugs} 
-          bugsPerPage={bugsPerPage} 
+          totalNum={totalNumberOfBugs} 
+          numPerPage={bugsPerPage} 
           filterBy={filterBy} 
           onSetFilterBy={onSetFilterBy} 
           setCurrentPage={setCurrentPage} 

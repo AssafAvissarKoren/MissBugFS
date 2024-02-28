@@ -1,49 +1,56 @@
 import { utilService } from './../../services/util.service.js'
 import { loggerService } from '../../services/logger.service.js'
+import { dbService } from '../../services/db.service.js'
 
-const JSON_Path = './data/bug.json'
-var bugs = utilService.readJsonFile(JSON_Path)
+const COLL_NAME = 'bug'
 const PAGE_SIZE = 4
-const ENTITY_COUNT = bugs.length
-
+const collection = await dbService.getCollection(COLL_NAME);
+const ENTITY_COUNT = await collection.countDocuments();
 
 export const bugService = {
     query,
     getById,
     remove,
-    save,
+    update,
+    add,
     PAGE_SIZE,
     ENTITY_COUNT,
 }
 
+
 async function query(filterBy = {}) {
     try {
-        let bugsToReturn = [...bugs]
+        let criteria = {};
         if (filterBy.text) {
             const regExp = new RegExp(filterBy.text, 'i')
-            bugsToReturn = bugsToReturn.filter(bug => regExp.test(bug.title) || regExp.test(bug.description))
-        }
-
+            criteria.title = { $regex: regExp };
+        } 
         if (filterBy.minSeverity) {
-            bugsToReturn = bugsToReturn.filter(bug => bug.severity >= filterBy.minSeverity)
+            criteria.severity = { $gte: filterBy.minSeverity };
         }
         if (filterBy.labels && filterBy.labels.length > 0) {
-            bugsToReturn = bugsToReturn.filter(bug => bug.labels.some(label => filterBy.labels.includes(label)))
-        }
-        if (filterBy.pageIdx !== undefined) {
-            const startIdx = (filterBy.pageIdx - 1) * PAGE_SIZE
-            bugsToReturn = bugsToReturn.slice(startIdx, startIdx + PAGE_SIZE)
-        }
-        if (filterBy.sortCriterion) {
-            bugsToReturn.sort((a, b) => {
-                if (filterBy.sortCriterion === 'date') return a.createdAt - b.createdAt
-                if (filterBy.sortCriterion === 'title') return a.title.localeCompare(b.title)
-            })
+            criteria.labels = { $in: filterBy.labels };
         }
         if (filterBy.createdBy) {
-            bugsToReturn = bugsToReturn.filter(bug => bug.creator._id === filterBy.createdBy)
+            criteria['creator._id'] = filterBy.createdBy;
         }
-        return bugsToReturn
+
+        let sortCriteria = {};
+        if (filterBy.sortCriterion === 'date') {
+            sortCriteria = { createdAt: 1 };
+        } else if (filterBy.sortCriterion === 'title') {
+            sortCriteria = { title: 1 };
+        }
+
+        let query = collection.find(criteria).sort(sortCriteria);
+
+        if (filterBy.pageIdx !== undefined) {
+            const startIdx = (parseInt(filterBy.pageIdx) - 1) * PAGE_SIZE;
+            query = query.skip(startIdx).limit(PAGE_SIZE);
+        }
+        const bugs = await query.toArray();
+
+        return bugs
     } catch (err) {
         loggerService.error(err)
         throw err
@@ -52,42 +59,41 @@ async function query(filterBy = {}) {
 
 async function getById(bugId) {
     try {
-        var bug = bugs.find(bug => bug._id === bugId)
-        if (!bug) throw `Couldn't find bug with _id ${bugId}`
+        const bug = await collection.findOne({ _id: bugId })
         return bug
     } catch (err) {
-        loggerService.error(err)
-        throw (err)
+        console.log(`ERROR: cannot find bug ${bugId}`)
+        throw err
     }
 }
 
 async function remove(bugId) {
     try {
-        const idx = bugs.findIndex(bug => bug._id === bugId)
-        if (idx === -1) throw `Couldn't find bug with _id ${bugId}`
-        bugs.splice(idx, 1)
-
-        await utilService.saveJsonFile(bugs, JSON_Path)
+        return await collection.deleteOne({ _id: bugId })
     } catch (err) {
-        loggerService.error(err)
+        console.log(`ERROR: cannot remove bug ${bugId}`)
         throw err
     }
 }
 
-async function save(bugToSave) {
+async function update(bug) {
+    console.log('bug.service.js update', bug);
     try {
-        if (bugToSave._id) {
-            var idx = bugs.findIndex(bug => bug._id === bugToSave._id)
-            if (idx === -1) throw `Couldn't find bug with _id ${bugId}`
-            bugs.splice(idx, 1, bugToSave)
-        } else {
-            bugToSave._id = utilService.makeId()
-            bugs.push(bugToSave)
-        }
-        await utilService.saveJsonFile(bugs, JSON_Path)
-        return bugToSave
+        const {updatedCount} = await collection.updateOne({ _id: bug._id }, { $set: bug })
+        // if(updatedCount > 1)
+        return bug
     } catch (err) {
-        loggerService.error(err)
+        console.log(`ERROR: cannot update bug ${bug._id}`)
+        throw err
+    }
+}
+
+async function add(bug) {
+    try {
+        await collection.insertOne(bug)
+        return bug
+    } catch (err) {
+        console.log(`ERROR: cannot insert bug`)
         throw err
     }
 }

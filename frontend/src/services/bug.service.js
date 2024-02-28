@@ -12,7 +12,8 @@ export const bugService = {
 	query,
 	get,
 	remove,
-	save,
+	add,
+    update,
 	getEmptyBug,
 	getDefaultFilter,
 	filterURL,
@@ -32,14 +33,19 @@ async function get(bugId) {
 
 async function remove(bugId) {
     const url = BASE_URL + bugId
-    var { data: res } = await axios.get(url)
+    var { data: res } = await axios.delete(url)
     return res
 }
 
-async function save(bug) {
-    const method = bug._id ? 'put' : 'post'
-    const url = bug._id ? BASE_URL + bug._id : BASE_URL
-    const { data: savedBug } = await axios[method](url, bug)
+async function add(bug) {
+    const url = BASE_URL
+    const { data: savedBug } = await axios.post(url, bug)
+    return savedBug
+}
+
+async function update(bug) {
+    const url = BASE_URL + bug._id
+    const { data: savedBug } = await axios.put(url, bug)
     return savedBug
 }
 

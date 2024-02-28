@@ -7,6 +7,7 @@ export function requireUser(req, res, next) {
 	if (!loggedinUser) return res.status(401).send('Not authenticated')
 
 	req.loggedinUser = loggedinUser
+	loggerService.info('Sample requireUser request')
 	next()
 }
 
@@ -19,5 +20,6 @@ export function requireAdmin(req, res, next) {
 	}
 
 	req.loggedinUser = loggedinUser
+	loggerService.info('Sample requireAdmin request')
 	next()
 }

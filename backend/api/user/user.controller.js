@@ -18,7 +18,7 @@ export async function getUsers(req, res) {
             fullname: req.query.fullname || '',
             minScore: +req.query.minScore || 0
         }
-        const users = userService.query(filterBy)
+        const users = await userService.query(filterBy)
         res.send(users)
     } catch (err) {
         loggerService.error('Failed to get users', err)
@@ -41,7 +41,7 @@ export async function addUser(req, res) {
     console.log('req.body:', req.body)
     try {
         const user = req.body
-        const savedUser = await userService.save(user)
+        const savedUser = await userService.add(user)
         res.send(savedUser)
     } catch (err) {
         loggerService.error('Failed to create user', err)
